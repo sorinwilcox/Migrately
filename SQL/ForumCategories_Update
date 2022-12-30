@@ -1,0 +1,34 @@
+ALTER proc [dbo].[ForumCategories_Update]							 
+					@Name nvarchar(50)
+				   ,@CreatedBy int
+				   ,@Id int
+
+as
+/* --- Test Code --
+
+
+	Declare @Id int =2;
+
+	Declare		
+					@Name nvarchar(50) = 'Test update'
+				   ,@CreatedBy int =3
+
+
+
+
+Execute dbo.ForumCategories_Update
+					@Name
+				   ,@CreatedBy
+				  ,@Id
+*/
+
+BEGIN
+
+	UPDATE [dbo].[ForumCategories]
+				SET	[Name] = @Name
+					,[CreatedBy] = @CreatedBy
+				WHERE Id = @Id
+
+
+
+END
