@@ -1,0 +1,48 @@
+USE [Migrately]
+ALTER proc [dbo].[Forums_Update]							 
+					@Name nvarchar(50)
+				   ,@Description nvarchar(4000)
+				   ,@ForumCategoryId int
+				   ,@isPrivate bit
+				   ,@isClosed bit
+				   ,@Id int OUTPUT
+
+as
+/* --- Test Code --
+
+	Declare @Id int =9;
+
+	Declare		
+					@Name nvarchar(50) = 'Test Name'
+				   ,@Description nvarchar(4000) = 'Test Description'
+				   ,@ForumCategoryId int = 3
+				   ,@isPrivate bit = 'false'
+				   ,@isClosed bit = 'false'
+
+
+
+Execute dbo.Forums_Update
+					@Name 
+				   ,@Description
+				   ,@ForumCategoryId
+				   ,@isPrivate
+				   ,@isClosed
+				   ,@Id
+
+*/
+
+BEGIN
+
+				UPDATE [dbo].[Forums]
+				
+				SET	[Name] = @Name
+					,[Description] = @Description
+					,[ForumCategoryId] = @ForumCategoryId
+					,[isPrivate] = @isPrivate
+					,[isClosed] = @isClosed
+
+				WHERE Id = @Id
+
+
+
+END
