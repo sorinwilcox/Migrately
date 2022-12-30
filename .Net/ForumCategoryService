@@ -1,0 +1,125 @@
+using Sabio.Data.Providers;
+using Sabio.Models.Domain.Forums;
+using Sabio.Models.Interfaces.Forums;
+using System.Collections.Generic;
+using System.Data.SqlClient;
+using System.Data;
+using Sabio.Data;
+using Sabio.Models.Requests.Forums;
+
+namespace Sabio.Services.ForumsService
+{
+    public class ForumCategoryService : IForumCategoryService
+    {
+        IDataProvider _data = null;
+        public ForumCategoryService(IDataProvider data)
+        {
+            _data = data;
+        }
+        public ForumCategory Get(int id)
+        {
+
+            string procName = "[dbo].[ForumCategories_GetById]";
+            ForumCategory forumCategory = null;
+            _data.ExecuteCmd(procName, delegate (SqlParameterCollection paramCollection)
+            {
+                paramCollection.AddWithValue("@Id", id);
+
+            }, delegate (IDataReader reader, short set) 
+            {
+                
+                forumCategory = MapSingleForumCategory(reader);
+
+
+            }
+
+            );
+            return forumCategory;
+        }
+
+        public List<ForumCategory> GetAll()
+        {
+
+            List<ForumCategory> list = null;
+            string procName = "[dbo].[ForumCategories_GetAll]";
+
+            _data.ExecuteCmd(procName, inputParamMapper: null
+                , singleRecordMapper: delegate (IDataReader reader, short set)
+                {
+                    ForumCategory aForumCategory = MapSingleForumCategory(reader);
+
+                    if (list == null)
+                    {
+                        list = new List<ForumCategory>();
+                    }
+                    list.Add(aForumCategory);
+                }
+            );
+            return list;
+        }
+
+        public int Add(ForumCategoryAddRequest request)
+        {
+            int id = 0;
+
+            string procName = "[dbo].[ForumCategories_Insert]";
+            _data.ExecuteNonQuery(procName, inputParamMapper: delegate (SqlParameterCollection col)
+            {
+                AddCommonParams(request, col);
+
+                SqlParameter idOut = new SqlParameter("@Id", SqlDbType.Int);
+                idOut.Direction = ParameterDirection.Output;
+
+                col.Add(idOut);
+            }
+            , returnParameters: delegate (SqlParameterCollection returnCollection)
+            {
+                object oId = returnCollection["@Id"].Value;
+                int.TryParse(oId.ToString(), out id);
+            });
+            return id;
+        }
+        public void Update(ForumCategoryUpdateRequest request)
+        {
+            string procName = "[dbo].[ForumCategories_Update]";
+            _data.ExecuteNonQuery(procName,
+                inputParamMapper: delegate (SqlParameterCollection col)
+                {
+
+                    AddCommonParams(request, col);
+                    col.AddWithValue("@Id", request.Id);
+                }
+            , returnParameters: null);
+
+        }
+        public void Delete(int Id)
+        {
+            string procName = "[dbo].[ForumCategories_Delete]";
+            _data.ExecuteNonQuery(procName, inputParamMapper: delegate (SqlParameterCollection Col)
+            {
+
+                Col.AddWithValue("@Id", Id);
+
+
+            }, returnParameters: null);
+        }
+
+        private static ForumCategory MapSingleForumCategory(IDataReader reader)
+        {
+            ForumCategory aForumCategory = new ForumCategory();
+            int startingIndex = 0;
+
+            aForumCategory.Id = reader.GetInt32(startingIndex++);
+            aForumCategory.Name = reader.GetSafeString(startingIndex++);
+            aForumCategory.CreatedBy = reader.GetInt32(startingIndex++);
+
+            return aForumCategory;
+        }
+
+        private static void AddCommonParams(ForumCategoryAddRequest request, SqlParameterCollection col)
+        {
+            col.AddWithValue("@Name", request.Name);
+            col.AddWithValue("@CreatedBy", request.CreatedBy);
+        }
+    }
+}
