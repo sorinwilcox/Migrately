@@ -1,0 +1,33 @@
+ALTER proc [dbo].[ForumCategories_Insert]							 
+					@Name nvarchar(50)
+				   ,@CreatedBy int
+				   ,@Id int OUTPUT
+
+as
+/* --- Test Code --
+
+		Declare @Id int = 0;
+
+		Declare		@Name nvarchar(50) = 'Test'
+				   ,@CreatedBy int = 1
+
+
+
+		Execute dbo.ForumCategories_Insert
+					@Name
+				   ,@CreatedBy
+				   ,@Id
+*/
+
+BEGIN
+
+	INSERT INTO [dbo].[ForumCategories]
+					([Name]
+					,[CreatedBy])
+
+VALUES
+					(@Name
+				   ,@CreatedBy)
+
+				Set @Id = SCOPE_IDENTITY()
+END
