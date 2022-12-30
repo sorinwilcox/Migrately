@@ -1,0 +1,21 @@
+ALTER proc [dbo].[ForumCategories_Delete]							 
+							@Id int
+
+as
+/* --- Test Code --
+		Declare @Id int =4
+
+		Execute dbo.ForumCategories_Delete @Id
+
+
+*/
+
+BEGIN
+
+
+  DELETE FROM [dbo].[ForumCategories]
+	Where Id = @Id
+
+
+
+END
