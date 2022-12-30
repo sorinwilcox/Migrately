@@ -1,0 +1,157 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Sabio.Models.Domain.Forums;
+using Sabio.Models.Interfaces.Forums;
+using Sabio.Services;
+using Sabio.Web.Controllers;
+using Sabio.Web.Models.Responses;
+using System.Collections.Generic;
+using System.Data.SqlClient;
+using System;
+using Sabio.Models.Requests.Forums;
+using SendGrid;
+
+namespace Sabio.Web.Api.Controllers.Fourms
+{
+    [Route("api/forumscategories")]
+    [ApiController]
+    public class ForumCategoryApiController : BaseApiController
+    {
+        private IForumCategoryService _service = null;
+        private IAuthenticationService<int> _authService = null;
+        public ForumCategoryApiController(IForumCategoryService service
+            , ILogger<ForumCategoryApiController> logger
+            , IAuthenticationService<int> authService) : base(logger)
+        {
+            _service = service;
+            _authService = authService;
+        }
+        [HttpGet("{id:int}")]
+        public ActionResult<ItemResponse<ForumCategory>> GetById(int id)
+        {
+            int iCode = 200;
+            BaseResponse response = null;
+
+            try
+            {
+                ForumCategory forumCategory = _service.Get(id);
+
+                if (forumCategory == null)
+                {
+                    iCode = 404;
+                    response = new ErrorResponse("Application Resource not found.");
+
+                }
+                else
+                {
+                    response = new ItemResponse<ForumCategory> { Item = forumCategory };
+                }
+            }
+            catch (Exception ex)
+            {
+                iCode = 500;
+                base.Logger.LogError(ex.ToString());
+                response = new ErrorResponse($"Generic Error: {ex.Message}");
+
+            }
+            return StatusCode(iCode, response);
+        }
+        [HttpGet]
+        public ActionResult GetAll()
+        {
+            int iCode = 200;
+            BaseResponse response = null;
+
+            try
+            {
+                List<ForumCategory> list = _service.GetAll();
+
+                if (list == null)
+                {
+                    iCode = 404;
+                    response = new ErrorResponse("App Resource not found.");
+                }
+                else
+                {
+                    response = new ItemsResponse<ForumCategory> { Items = list };
+                }
+            }
+            catch (Exception ex)
+            {
+                iCode = 500;
+                base.Logger.LogError(ex.ToString());
+                response = new ErrorResponse($"Generic Error: {ex.Message}");
+            }
+
+            return StatusCode(iCode, response);
+        }
+        [HttpPost]
+        public ActionResult<ItemResponse<int>> Create(ForumCategoryAddRequest model)
+        {
+            int iCode = 200;
+            ObjectResult result = null;
+            try
+            {
+                int id = _service.Add(model);
+
+                ItemResponse<int> response = new ItemResponse<int>() { Item = id };
+
+                result = Created201(response);
+
+            }
+            catch (Exception ex)
+            {
+                iCode = 500;
+                base.Logger.LogError(ex.ToString());
+                ErrorResponse response = new ErrorResponse(ex.Message);
+
+
+            }
+            return StatusCode(iCode, result);
+        }
+        [HttpPut("{id:int}")]
+        public ActionResult<SuccessResponse> Update(ForumCategoryUpdateRequest model)
+        {
+
+            int iCode = 200;
+            BaseResponse response = null;
+
+            try
+            {
+                _service.Update(model);
+
+                response = new SuccessResponse();
+
+
+            }
+            catch (Exception ex)
+            {
+
+                iCode = 500;
+                base.Logger.LogError(ex.ToString());
+                response = new ErrorResponse($"Generic Error: {ex.Message}");
+            }
+            return StatusCode(iCode, response);
+        }
+        [HttpDelete("{id:int}")]
+        public ActionResult<SuccessResponse> Delete(int id)
+        {
+            int iCode = 200;
+            BaseResponse response = null;
+
+            try
+            {
+                _service.Delete(id);
+                response = new SuccessResponse();
+            }
+            catch (Exception ex)
+            {
+                iCode = 500;
+                base.Logger.LogError(ex.ToString());
+                response = new ErrorResponse($"Generic Error: {ex.Message}");
+            }
+
+            return StatusCode(iCode, response);
+        }
+    }
+}
