@@ -1,0 +1,21 @@
+ALTER proc [dbo].[ForumCategories_GetById]							 
+							@Id int
+
+as
+/* --- Test Code --
+
+		Declare @Id int = 1
+		Execute dbo.ForumCategories_GetById @Id
+*/
+
+BEGIN
+SELECT [Id]
+      ,[Name]
+	  ,[CreatedBy]
+
+  FROM [dbo].[ForumCategories]
+	Where Id = @Id
+
+
+
+END
