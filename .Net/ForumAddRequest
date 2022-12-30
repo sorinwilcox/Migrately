@@ -1,0 +1,19 @@
+namespace Sabio.Models.Requests.Forums
+{
+    public class ForumAddRequest
+    {
+        [Required]
+        [StringLength(90)]
+        public string Name { get; set; }
+        [Required]
+        [StringLength(9000)]
+        public string Description { get; set; }
+        [Required]
+        [Range(1, 9000)]
+        public int ForumCategoryId { get; set; }
+        [Required]
+        public bool isPrivate { get; set; }
+        [Required]
+        public bool isClosed { get; set; }
+    }
+}
