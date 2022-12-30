@@ -1,0 +1,45 @@
+ALTER proc [dbo].[Forums_SearchPaginated]
+    @PageIndex int 
+    ,@PageSize int 
+	,@Query nvarchar(100)
+/*  ---------TEST CODE ------------
+    Declare
+        @PageIndex int = 0
+        ,@PageSize int = 3
+		,@Query nvarchar(100) = 'I-90'
+    Execute dbo.Forums_SearchPaginated
+        @PageIndex
+        ,@PageSize
+		,@Query
+
+*/
+As
+BEGIN
+    Declare 
+        @offset int = @PageIndex * @PageSize
+        
+        SELECT
+			f.[Id]
+			,f.[Name] as ForumName
+			,f.[Description]
+			,fc.Id
+			,fc.[Name] as FormCategortiesName
+			,f.[isPrivate] as onlyPublic
+			,f.[isClosed] as openForum
+			  ,TotalCount = COUNT(1) OVER() 
+
+        From dbo.Forums As f inner join dbo.ForumCategories as fc 
+			on f.ForumCategoryId = fc.Id
+			inner join dbo.EntityTypes as e
+			on fc.Id = e.Id
+		WHERE	(
+				f.Name LIKE '%' + @Query + '%'
+				OR f.Description LIKE '%' + @Query + '%'
+				OR fc.Name LIKE '%' + @Query + '%'
+				)
+
+        Order by f.DateAdded
+        
+        Offset @offset rows
+        Fetch next @PageSize rows only
+END
