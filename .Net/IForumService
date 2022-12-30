@@ -1,0 +1,17 @@
+namespace Sabio.Models.Interfaces.Forums
+{
+    public interface IForumService
+    {
+        Forum Get(int id);
+        List<Forum> GetAll();
+        int Add(ForumAddRequest request);
+        void Update(ForumUpdateRequest request);
+        void Delete(int Id);
+        Paged<Forum> CategoryPagination(int pageIndex, int pageSize);
+        Paged<Forum> SearchPagination(int pageIndex, int pageSize, string query);
+
+        Paged<Forum> AllPagination(int pageIndex, int pageSize);
+        Paged<Forum> EntityPagination(int pageIndex, int pageSize);
+        ForumDetails GetForumDetails(int id);
+    }
+}
