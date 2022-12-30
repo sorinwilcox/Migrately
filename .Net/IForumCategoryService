@@ -1,0 +1,11 @@
+namespace Sabio.Models.Interfaces.Forums
+{
+    public interface IForumCategoryService
+    {
+        ForumCategory Get(int id);
+        List<ForumCategory> GetAll();
+        int Add(ForumCategoryAddRequest request);
+        void Update(ForumCategoryUpdateRequest request);
+        void Delete(int Id);
+    }
+}
