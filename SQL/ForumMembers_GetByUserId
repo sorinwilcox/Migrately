@@ -1,0 +1,25 @@
+ALTER proc [dbo].[ForumMembers_GetByUserId]							 
+							@UserId int
+
+
+as
+/* --- Test Code --
+		Declare @UserId int = 1
+
+		Execute dbo.ForumMembers_GetByUserId @UserId
+*/
+
+BEGIN
+SELECT
+      [UserId]
+	 ,[isActive]
+	 ,[ForumId]
+
+
+
+  FROM [dbo].[ForumMembers]
+	Where UserId = @UserId
+
+
+
+END
