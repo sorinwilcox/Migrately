@@ -1,0 +1,112 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Sabio.Services;
+using Sabio.Web.Controllers;
+using Sabio.Web.Models.Responses;
+using System;
+using Sabio.Models.Domain.Forums;
+using Sabio.Models.Interfaces.Forums;
+using Sabio.Models.Requests.Forums;
+
+namespace Sabio.Web.Api.Controllers.Fourms
+{
+    [Route("api/forumsmembers")]
+    [ApiController]
+    public class ForumMemberApiController : BaseApiController
+    {
+        private IForumMemberService _service = null;
+        private IAuthenticationService<int> _authService = null;
+        public ForumMemberApiController(IForumMemberService service
+            , ILogger<ForumMemberApiController> logger
+            , IAuthenticationService<int> authService) : base(logger)
+        {
+            _service = service;
+            _authService = authService;
+        }
+        [HttpGet("{id:int}")]
+        public ActionResult<ItemResponse<ForumMember>> GetById(int id)
+        {
+            int iCode = 200;
+            BaseResponse response = null;
+
+            try
+            {
+                ForumMember forumMember = _service.Get(id);
+
+                if (forumMember == null)
+                {
+                    iCode = 404;
+                    response = new ErrorResponse("Application Resource not found.");
+
+                }
+                else
+                {
+                    response = new ItemResponse<ForumMember> { Item = forumMember };
+                }
+            }
+            catch (Exception ex)
+            {
+                iCode = 500;
+                base.Logger.LogError(ex.ToString());
+                response = new ErrorResponse($"Generic Error: {ex.Message}");
+
+            }
+            return StatusCode(iCode, response);
+        }
+        [HttpGet("users/{id:int}")]
+        public ActionResult<ItemResponse<ForumMember>> GetByUser(int id)
+        {
+            int iCode = 200;
+            BaseResponse response = null;
+
+            try
+            {
+                ForumMember forumMember = _service.GetUserId(id);
+
+                if (forumMember == null)
+                {
+                    iCode = 404;
+                    response = new ErrorResponse("Application Resource not found.");
+
+                }
+                else
+                {
+                    response = new ItemResponse<ForumMember> { Item = forumMember };
+                }
+            }
+            catch (Exception ex)
+            {
+                iCode = 500;
+                base.Logger.LogError(ex.ToString());
+                response = new ErrorResponse($"Generic Error: {ex.Message}");
+
+            }
+            return StatusCode(iCode, response);
+        }
+        [HttpPut("{id:int}")]
+        public ActionResult<SuccessResponse> Update(ForumMemberUpdateRequest model)
+        {
+
+            int iCode = 200;
+            BaseResponse response = null;
+
+            try
+            {
+                _service.Update(model);
+
+                response = new SuccessResponse();
+
+
+            }
+            catch (Exception ex)
+            {
+
+                iCode = 500;
+                base.Logger.LogError(ex.ToString());
+                response = new ErrorResponse($"Generic Error: {ex.Message}");
+            }
+            return StatusCode(iCode, response);
+        }
+
+    }
+}
