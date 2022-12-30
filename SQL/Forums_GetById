@@ -1,0 +1,28 @@
+ALTER proc [dbo].[Forums_GetById]							 
+							@Id int
+
+as
+/* --- Test Code --
+		Declare @Id int = 2
+		Execute dbo.Forums_GetById @Id
+*/
+
+BEGIN
+SELECT f.[Id]
+		,f.[Name]
+		,f.[Description]
+		,fc.Id
+		,fc.[Name] as FormCategortiesName
+		,[isPrivate] as onlyPublic
+		,[isClosed] as openForum
+
+
+
+	FROM [dbo].[Forums] as f
+	inner join dbo.ForumCategories as fc
+	on fc.Id = f.ForumCategoryId
+	Where f.Id = @Id
+
+
+
+END
