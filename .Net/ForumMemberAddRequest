@@ -1,0 +1,11 @@
+namespace Sabio.Models.Requests.Forums
+{
+    public class ForumMemberAddRequest
+    {
+        [Required]
+        [Range(1, 9000)]
+        public int UserId { get; set; }
+        [Required]
+        public bool IsActive { get; set; }
+    }
+}
