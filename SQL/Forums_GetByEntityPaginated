@@ -1,0 +1,40 @@
+ALTER proc [dbo].[Forums_GetByEntityPaginated]
+    @PageIndex int 
+    ,@PageSize int 
+	,@ForumCategoryId int
+/*  ---------TEST CODE ------------
+    Declare
+        @PageIndex int = 0
+        ,@PageSize int = 3
+    Execute dbo.Forums_GetByEntityPaginated
+        @PageIndex
+        ,@PageSize
+
+
+				f.isPrivate as isPublic,
+				f.isClosed as openForums
+
+*/
+As
+BEGIN
+    Declare 
+        @offset int = @PageIndex * @PageSize
+        
+        SELECT
+				f.[Id]
+			  ,[isPrivate] as onlyPublic
+			  ,[isClosed] as openForum
+			  ,fc.[Name] as FormCategortiesName
+			  ,f.ForumCategoryId as ForumCategoryId
+			  ,TotalCount = COUNT(1) OVER() 
+
+        From dbo.Forums As f inner join dbo.ForumCategories as fc
+			on f.ForumCategoryId = fc.Id
+		WHERE isClosed = 0 and isPrivate = 0
+
+        Order by f.DateAdded
+        
+        Offset @offset rows
+        Fetch next @PageSize rows only
+
+END
