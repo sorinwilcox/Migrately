@@ -1,0 +1,79 @@
+namespace Sabio.Services.ForumsService
+{
+    public class ForumMemberService : IForumMemberService
+    {
+        IDataProvider _data = null;
+        public ForumMemberService(IDataProvider data)
+        {
+            _data = data;
+        }
+        public ForumMember Get(int id)
+        {
+
+            string procName = "[dbo].[ForumMembers_GetForumId]";
+            ForumMember forumMember = null;
+            _data.ExecuteCmd(procName, delegate (SqlParameterCollection paramCollection)
+            {
+                paramCollection.AddWithValue("@ForumId", id);
+
+            }, delegate (IDataReader reader, short set) 
+            {
+                
+                forumMember = MapSingleForumMember(reader);
+
+
+            });
+            return forumMember;
+        }
+
+        public ForumMember GetUserId(int id)
+        {
+
+            string procName = "[dbo].[ForumMembers_GetByUserId]";
+            ForumMember forumMember = null;
+            _data.ExecuteCmd(procName, delegate (SqlParameterCollection paramCollection)
+            {
+                paramCollection.AddWithValue("@UserId", id);
+
+            }, delegate (IDataReader reader, short set)
+            {
+                forumMember = new ForumMember();
+                int startingIndex = 0;
+                forumMember.UserId = reader.GetSafeInt32(startingIndex++);
+
+
+            });
+            return forumMember;
+        }
+        public void Update(ForumMemberUpdateRequest request)
+        {
+            string procName = "[dbo].[ForumMembers_UpdateStatus]";
+            _data.ExecuteNonQuery(procName,
+                inputParamMapper: delegate (SqlParameterCollection col)
+                {
+
+                    AddCommonParams(request, col);
+                }
+            , returnParameters: null);
+
+        }
+
+        private static ForumMember MapSingleForumMember(IDataReader reader)
+        {
+            ForumMember aForumMember = new ForumMember();
+            int startingIndex = 0;
+
+            aForumMember.ForumId = reader.GetSafeInt32(startingIndex++);
+            aForumMember.UserId = reader.GetSafeInt32(startingIndex++);
+            aForumMember.IsActive = reader.GetSafeBool(startingIndex++);
+
+            return aForumMember;
+        }
+        private static void AddCommonParams(ForumMemberUpdateRequest request, SqlParameterCollection col)
+        {
+            col.AddWithValue("@ForumId", request.Id);
+            col.AddWithValue("@UserId", request.UserId);
+            col.AddWithValue("@IsActive", request.IsActive);
+        }
+    }
+}
