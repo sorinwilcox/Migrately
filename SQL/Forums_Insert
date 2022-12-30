@@ -1,0 +1,46 @@
+ALTER proc [dbo].[Forums_Insert]							 
+					@Name nvarchar(50)
+				   ,@Description nvarchar(4000)
+				   ,@ForumCategoryId int
+				   ,@isPrivate bit
+				   ,@isClosed bit
+				   ,@Id int OUTPUT
+
+as
+/* --- Test Code --
+		Declare @Id int = 0;
+
+		Declare		@Name nvarchar(50) = 'Test'
+				   ,@Description nvarchar(4000) = 'Test'
+				   ,@ForumCategoryId int = 1
+				   ,@isPrivate bit = 'true'
+				   ,@isClosed bit = 'true'
+
+
+		Execute dbo.Forums_Insert
+					@Name
+				   ,@Description
+				   ,@ForumCategoryId
+				   ,@isPrivate
+				   ,@isClosed
+				   ,@Id OUTPUT
+*/
+
+BEGIN
+
+	INSERT INTO [dbo].[Forums]
+					([Name]
+					,[Description]
+					,[ForumCategoryId]
+					,[isPrivate]
+					,[isClosed])
+
+VALUES
+					(@Name
+				   ,@Description
+				   ,@ForumCategoryId
+				   ,@isPrivate
+				   ,@isClosed)
+
+				Set @Id = SCOPE_IDENTITY()
+END
