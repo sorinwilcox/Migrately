@@ -1,0 +1,41 @@
+USE [Migrately]
+GO
+/****** Object:  StoredProcedure [dbo].[Forums_GetAll]    Script Date: 12/30/2022 10:10:38 AM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- Author: <Author,Sorin W.>
+-- Create date: <Create Date,,>
+-- Description: <Forums_GetAll>
+-- Code Reviewer:Jonathan .S
+
+
+ALTER proc [dbo].[Forums_GetAll]							 
+							
+
+as
+/* --- Test Code --
+
+			Execute dbo.Forums_GetAll
+*/
+
+BEGIN
+SELECT		f.[Id]
+			,f.[Name]
+			,f.[Description]
+			,fc.Id
+			,fc.[Name] as FormCategortiesName
+			,[isPrivate] as onlyPublic
+			,[isClosed] as openForum
+			,f.[DateCreated]
+			,f.[DateAdded]
+
+  FROM [dbo].[Forums] as f
+  inner join dbo.ForumCategories as fc
+  on fc.Id = f.ForumCategoryId
+
+
+
+
+END
