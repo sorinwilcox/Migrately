@@ -1,0 +1,32 @@
+ALTER proc [dbo].[ForumMembers_UpdateStatus]							 
+							@ForumId int
+							,@UserId int
+							,@isActive bit
+
+
+as
+/* --- Test Code --
+
+
+		Declare @ForumId int =2
+				,@UserId int = 4
+				,@IsActive bit = 0
+
+		Execute dbo.ForumMembers_UpdateStatus 
+				
+				@ForumId
+				,@UserId
+				,@IsActive
+
+				SELECT *
+				from dbo.ForumMembers
+
+*/
+
+BEGIN
+
+UPDATE [dbo].[ForumMembers]
+				SET [isActive] = @isActive
+				WHERE UserId = @UserId and ForumId = @ForumId
+
+END
