@@ -1,0 +1,13 @@
+namespace Sabio.Models.Domain.Forums
+{
+    public class ForumMember
+    {
+
+        public int ForumId { get; set; }
+ 
+        public int UserId { get; set; }
+
+        public bool IsActive { get; set; }
+
+    }
+}
