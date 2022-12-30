@@ -1,0 +1,322 @@
+namespace Sabio.Services.ForumsService
+
+{
+    public class ForumService : IForumService
+    {
+        private IDataProvider _data = null;
+        private ILookUpService _lookUpService = null;
+        public ForumService(IDataProvider data, ILookUpService lookup)
+        {
+            _data = data;
+            _lookUpService = lookup;
+        }
+
+        public Forum Get(int id)
+        {
+
+            string procName = "[dbo].[Forums_GetById]";
+            Forum forum = null;
+            _data.ExecuteCmd(procName, delegate (SqlParameterCollection paramCollection)
+            {
+                paramCollection.AddWithValue("@Id", id);
+
+            }, (Action<IDataReader, short>)delegate (IDataReader reader, short set)
+            {
+
+                int index = 0;
+                forum = this.MapSingleForum(reader, ref index);
+
+
+            }
+
+            );
+            return forum;
+        }
+
+
+        public List<Forum> GetAll()
+        {
+
+            List<Forum> list = null;
+            string procName = "[dbo].[Forums_GetAll]";
+
+            _data.ExecuteCmd(procName, inputParamMapper: null
+                , singleRecordMapper: (Action<IDataReader, short>)delegate (IDataReader reader, short set)
+                {
+                    int index = 0;
+                    Forum aForum = this.MapSingleForum(reader, ref index);
+
+                    if (list == null)
+                    {
+                        list = new List<Forum>();
+                    }
+                    list.Add(aForum);
+                }
+            );
+            return list;
+        }
+
+        public int Add(ForumAddRequest request)
+        {
+            int id = 0;
+
+            string procName = "[dbo].[Forums_Insert]";
+            _data.ExecuteNonQuery(procName, inputParamMapper: delegate (SqlParameterCollection col)
+            {
+                AddCommonParams(request, col);
+
+                SqlParameter idOut = new SqlParameter("@Id", SqlDbType.Int);
+                idOut.Direction = ParameterDirection.Output;
+
+                col.Add(idOut);
+            }
+            , returnParameters: delegate (SqlParameterCollection returnCollection)
+            {
+                object oId = returnCollection["@Id"].Value;
+                int.TryParse(oId.ToString(), out id);
+            });
+            return id;
+        }
+        public void Update(ForumUpdateRequest request)
+        {
+            string procName = "[dbo].[Forums_Update]";
+            _data.ExecuteNonQuery(procName,
+                inputParamMapper: delegate (SqlParameterCollection col)
+                {
+
+                    AddCommonParams(request, col);
+                    col.AddWithValue("@Id", request.Id);
+                }
+            , returnParameters: null);
+
+        }
+        public void Delete(int Id)
+        {
+            string procName = "[dbo].[Forums_Delete]";
+            _data.ExecuteNonQuery(procName, inputParamMapper: delegate (SqlParameterCollection Col)
+            {
+
+                Col.AddWithValue("@Id", Id);
+
+
+            }, returnParameters: null);
+        }
+        public Paged<Forum> CategoryPagination(int pageIndex, int pageSize)
+        {
+
+            Paged<Forum> pagedResult = null;
+            List<Forum> result = null;
+            int totalCount = 0;
+
+
+            string procName = "[dbo].[Forums_GetByCategoryPaginated]";
+            _data.ExecuteCmd(procName, delegate (SqlParameterCollection paramCollection)
+            {
+
+                paramCollection.AddWithValue("@PageIndex", pageIndex);
+                paramCollection.AddWithValue("@PageSize", pageSize);
+            }, singleRecordMapper: delegate (IDataReader reader, short set)
+            {
+                int index = 0;
+                Forum aforum = this.MapSingleForum(reader, ref index);
+
+                if (totalCount == 0)
+                {
+                    totalCount = reader.GetSafeInt32(index++);
+                }
+                if (result == null)
+                {
+                    result = new List<Forum>();
+                }
+                result.Add(aforum);
+            }
+            );
+            if (result != null)
+            {
+                pagedResult = new Paged<Forum>(result, pageIndex, pageSize, totalCount);
+            }
+            return pagedResult;
+        }
+        public Paged<Forum> AllPagination(int pageIndex, int pageSize)
+        {
+
+            Paged<Forum> pagedResult = null;
+            List<Forum> result = null;
+            int totalCount = 0;
+
+
+            string procName = "[dbo].[Forums_GetAllPaginated]";
+            _data.ExecuteCmd(procName, delegate (SqlParameterCollection paramCollection)
+            {
+
+                paramCollection.AddWithValue("@PageIndex", pageIndex);
+                paramCollection.AddWithValue("@PageSize", pageSize);
+            }, singleRecordMapper: (Action<IDataReader, short>)delegate (IDataReader reader, short set)
+            {
+                int index = 0;
+                Forum aforum = this.MapSingleForum(reader, ref index);
+
+                if (totalCount == 0)
+                {
+                    totalCount = reader.GetSafeInt32(index++);
+                }
+                if (result == null)
+                {
+                    result = new List<Forum>();
+                }
+                result.Add(aforum);
+            }
+            );
+            if (result != null)
+            {
+                pagedResult = new Paged<Forum>(result, pageIndex, pageSize, totalCount);
+            }
+            return pagedResult;
+        }
+        public Paged<Forum> EntityPagination(int pageIndex, int pageSize) //wait till we have enitity type.
+        {
+
+            Paged<Forum> pagedResult = null;
+            List<Forum> result = null;
+            int totalCount = 0;
+
+
+            string procName = "[dbo].[Forums_GetByEntityPaginated";
+            _data.ExecuteCmd(procName, delegate (SqlParameterCollection paramCollection)
+            {
+
+                paramCollection.AddWithValue("@PageIndex", pageIndex);
+                paramCollection.AddWithValue("@PageSize", pageSize);
+            }, singleRecordMapper: (Action<IDataReader, short>)delegate (IDataReader reader, short set)
+            {
+                int index = 0;
+                Forum aforum = this.MapSingleForum(reader, ref index);
+
+                if (totalCount == 0)
+                {
+                    totalCount = reader.GetSafeInt32(index++);
+                }
+                if (result == null)
+                {
+                    result = new List<Forum>();
+                }
+                result.Add(aforum);
+            }
+            );
+            if (result != null)
+            {
+                pagedResult = new Paged<Forum>(result, pageIndex, pageSize, totalCount);
+            }
+            return pagedResult;
+        }
+
+        public Paged<Forum> SearchPagination(int pageIndex, int pagesize, string query)
+        {
+            Paged<Forum> pagedList = null;
+            List<Forum> list = null;
+            int totalCount = 0;
+
+            string procName = "[dbo].[Forums_SearchPaginated]";
+
+            _data.ExecuteCmd(procName, (param) =>
+
+            {
+                param.AddWithValue("@PageIndex", pageIndex);
+                param.AddWithValue("@PageSize", pagesize);
+                param.AddWithValue("@Query", query);
+
+            },
+            (Action<IDataReader, short>)((reader, recordSetIndex) =>
+            {
+                int index = 0;
+                Forum forum = this.MapSingleForum(reader, ref index);
+                totalCount = reader.GetSafeInt32(index);
+
+                if (list == null)
+                {
+                    list = new List<Forum>();
+                }
+
+                list.Add(forum);
+            })
+            );
+            if (list != null)
+            {
+                pagedList = new Paged<Forum>(list, pageIndex, pagesize, totalCount);
+            }
+            return pagedList;
+        }
+
+        public ForumDetails GetForumDetails(int id)
+        {
+
+            string procName = "[dbo].[Forums_GetForumDetails]";
+            ForumDetails forumDetails = null;
+            _data.ExecuteCmd(procName, delegate (SqlParameterCollection paramCollection)
+            {
+                paramCollection.AddWithValue("@Id", id);
+
+            }, delegate (IDataReader reader, short set)
+            {
+
+                forumDetails = MapSingleForumDetail(reader);
+
+            }
+
+            );
+            return forumDetails;
+        }
+
+        private static ForumDetails MapSingleForumDetail(IDataReader reader)
+        {
+            ForumDetails forumDetails = new ForumDetails();
+            int index = 0;
+            forumDetails.Id = reader.GetSafeInt32(index++);
+            forumDetails.ForumName = reader.GetSafeString(index++);
+            forumDetails.Description = reader.GetSafeString(index++);
+            forumDetails.ForumCategoryName = reader.GetSafeString(index++);
+            forumDetails.FirstName = reader.GetSafeString(index++);
+            forumDetails.LastName = reader.GetSafeString(index++);
+            forumDetails.AvatarUrl = reader.GetSafeString(index++);
+            return forumDetails;
+        }
+
+        private Forum MapSingleForum(IDataReader reader, ref int index)
+        {
+            Forum aForum = new Forum();
+
+            aForum.Id = reader.GetSafeInt32(index++);
+            aForum.Name = reader.GetSafeString(index++);
+            aForum.Description = reader.GetSafeString(index++);
+            aForum.ForumCategory = _lookUpService.MapSingleLookUp(reader, ref index);
+            aForum.IsPrivate = reader.GetSafeBool(index++);
+            aForum.IsClosed = reader.GetSafeBool(index++);
+
+
+            return aForum;
+        }
+
+        private static void AddCommonParams(ForumAddRequest request, SqlParameterCollection col)
+        {
+            col.AddWithValue("@Name", request.Name);
+            col.AddWithValue("@Description", request.Description);
+            col.AddWithValue("@ForumCategoryId", request.ForumCategoryId);
+            col.AddWithValue("@isPrivate", request.isPrivate);
+            col.AddWithValue("@isClosed", request.isClosed);
+        }
+
+
+
+
+
+
+    }
+
+
+
+
+
+
+
+}
+
