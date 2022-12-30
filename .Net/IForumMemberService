@@ -1,0 +1,9 @@
+namespace Sabio.Models.Interfaces.Forums
+{
+    public interface IForumMemberService
+    {
+        ForumMember Get(int id);
+        ForumMember GetUserId(int id);
+        void Update(ForumMemberUpdateRequest request);
+    }
+}
