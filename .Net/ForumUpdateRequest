@@ -1,0 +1,8 @@
+namespace Sabio.Models.Requests.Forums
+{
+    public class ForumUpdateRequest : ForumAddRequest, IModelIdentifier
+    {
+
+        public int Id { get; set; }
+    }
+}
