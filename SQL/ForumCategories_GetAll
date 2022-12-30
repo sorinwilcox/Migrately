@@ -1,0 +1,20 @@
+ALTER proc [dbo].[ForumCategories_GetAll]							 
+							
+
+as
+/* --- Test Code --
+
+			Execute dbo.ForumCategories_GetAll
+*/
+
+BEGIN
+SELECT [Id]
+      ,[Name]
+	  ,[CreatedBy]
+
+  FROM [dbo].[ForumCategories]
+
+
+
+
+END
