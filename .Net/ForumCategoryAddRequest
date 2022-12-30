@@ -1,0 +1,12 @@
+namespace Sabio.Models.Requests.Forums
+{
+    public class ForumCategoryAddRequest
+    {
+        [Required]
+        [StringLength(90)]
+        public string Name { get; set; }
+        [Required]
+        [Range(1, 9000)]
+        public int CreatedBy { get; set; }
+    }
+}
