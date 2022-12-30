@@ -1,0 +1,239 @@
+import React from "react";
+import { Card, Col, Button, Row } from "react-bootstrap";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import { useState, useEffect } from "react";
+import debug from "sabio-debug";
+import toastr from "toastr";
+import "./forum.css";
+import forumFormSchema from "../../schemas/forumFormSchemas";
+import forumsService from "../../services/forumsService";
+import lookUpService from "services/lookUpService";
+import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import swal from "sweetalert2";
+
+const _logger = debug.extend("basicForm");
+function FormBasic() {
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    forumCategory: "",
+    isPrivate: false,
+    isClosed: false,
+  });
+
+  const [forumCategories, setForumCategories] = useState({
+    forumCategoriesComponent: [],
+  });
+
+  const [isToggled, setToggle] = useState(false);
+
+  const toggleForums = () => {
+    setToggle(!isToggled);
+  };
+
+  useEffect(() => {
+    lookUpService
+      .LookUp(["forumcategories"])
+      .then(onGetForumSuccessLookUp)
+      .catch(onGlobalError);
+  }, []);
+
+  useEffect(() => {
+    if (state?.stateOfForums?.type === "FORUMS_EDIT") {
+      setFormData((prevState) => {
+        const update = {
+          ...prevState,
+          ...state.stateOfForums.payload,
+        };
+        _logger("useEffect from edit form", update);
+        return update;
+      });
+    }
+  }, []);
+  const onGetForumSuccessLookUp = (response) => {
+    _logger("look success", response);
+    let forumArray = response.item.forumcategories;
+    setForumCategories((prevState) => {
+      const pd = { ...prevState };
+      pd.forumCategoriesComponent = forumArray.map(mapForumCategory);
+      return pd;
+    });
+  };
+  const onGlobalError = (response) => {
+    _logger(response, "On Error");
+    toastr.error("Error");
+  };
+  const handleSubmit = (values, { resetForm }) => {
+    const forumPayload = {
+      name: values.name,
+      description: values.description,
+      forumCategoryId: parseInt(values.forumCategory, 10),
+      isPrivate: values.isPrivate,
+      isClosed: values.isClosed,
+    };
+    if (formData.id > 0) {
+      forumsService
+        .editForums(formData.id, forumPayload)
+        .then(onEditSuccess)
+        .catch(onEditError);
+    } else {
+      forumsService
+        .addForums(forumPayload)
+        .then(onAddForumSuccess)
+        .catch(onAddForumError);
+      resetForm();
+    }
+  };
+  const onAddForumSuccess = (response) => {
+    _logger(response, "Form Added response");
+    toastr.success("Form Created response");
+    swal.fire("Added", "Form has been Added.", "success");
+  };
+  const onAddForumError = (Error) => {
+    _logger(Error, "Form Error");
+    toastr.Error("Form Creation Error");
+  };
+  const onEditSuccess = () => {
+    swal.fire("Updated", "Form has been Updated.", "success");
+  };
+  const onEditError = () => {
+    swal.fire("Error", "Form has an Error.", "Error");
+  };
+  const mapForumCategory = (forumCategory) => {
+    return (
+      <option value={forumCategory.id} key={forumCategory.id}>
+        {forumCategory.name}
+      </option>
+    );
+  };
+
+  const navigate = useNavigate();
+  const { state } = useLocation();
+  _logger("use navigate", navigate);
+
+  return (
+    <Card className="border-0 ">
+      <Card.Header>
+        <div className="mb-3 mb-lg-0 forum-centering ">
+          <h3 className="mb-0">Create a Form</h3>
+        </div>
+      </Card.Header>
+      <Card.Body>
+        {/*  Forums 1  */}
+        <Row className="mb-5 forum-centering">
+          <Col lg={9} md={8} sm={12}>
+            <Formik
+              enableReinitialize={true}
+              initialValues={formData}
+              onSubmit={handleSubmit}
+              validationSchema={forumFormSchema}
+            >
+              {({ resetForm, values }) => (
+                <Form>
+                  <div className="form-group mb-3 ">
+                    <h3>Form Name</h3>
+                    <Field
+                      type="text"
+                      name="name"
+                      placeholder="Form Name"
+                      className="form-control"
+                    ></Field>
+                    <ErrorMessage
+                      name="name"
+                      component="div"
+                      className="forum-form-has-error"
+                    />
+                  </div>
+                  <div className="form-group mb-3">
+                    <h3>Form Description </h3>
+                    <Field
+                      as="textarea"
+                      rows={8}
+                      name="description"
+                      placeholder="Form Description"
+                      className="form-control mb-1"
+                    ></Field>
+                    <ErrorMessage
+                      name="description"
+                      component="div"
+                      className="forum-form-has-error"
+                    />
+                  </div>
+                  <div
+                    className="form-select"
+                    aria-label="Default select example"
+                  >
+                    <h3>Form Category </h3>
+                    <Field
+                      component="select"
+                      name="forumCategory"
+                      className="form-control mb-1"
+                    >
+                      <option value="">Please select forum category</option>
+                      {forumCategories.forumCategoriesComponent}
+                    </Field>
+                    <ErrorMessage
+                      name="forumCategory"
+                      component="div"
+                      className="forum-form-has-error"
+                    />
+                  </div>
+                  <div className="container-forum-switches">
+                    <h3 className="mb-0">Private or Public Form</h3>
+                    <div className="form-check form-switch mb-3">
+                      <Field
+                        className="form-check-input"
+                        type="checkbox"
+                        role="switch"
+                        id="flexSwitchCheckDefault"
+                        name="isPrivate"
+                      ></Field>
+                      <label
+                        onClick={toggleForums}
+                        className="form-check form-switch"
+                      >
+                        {values.isPrivate ? "Private" : "Public"}
+                      </label>
+                    </div>
+                    <h3 className="mb-0">Closed or Open Form</h3>
+                    <div className="form-check form-switch">
+                      <Field
+                        className="form-check-input"
+                        type="checkbox"
+                        role="switch"
+                        id="flexSwitchCheckDefault"
+                        name="isClosed"
+                      ></Field>
+                      <label
+                        onClick={toggleForums}
+                        className="form-check form-switch"
+                      >
+                        {values.isClosed ? "Closed" : "Open"}
+                      </label>
+                    </div>
+                  </div>
+                  {/*  Button  */}
+                  <div className="button-forum-container">
+                    <hr />
+                    <Button
+                      variant="primary"
+                      type="reset"
+                      onClick={() => resetForm()}
+                    >
+                      Clear Form
+                    </Button>
+                    <Button className="btn btn-primary mx-10" type="submit">
+                      Submit Form
+                    </Button>
+                  </div>
+                </Form>
+              )}
+            </Formik>
+          </Col>
+        </Row>
+      </Card.Body>
+    </Card>
+  );
+}
+export default FormBasic;
