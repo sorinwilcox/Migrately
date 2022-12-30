@@ -1,0 +1,285 @@
+namespace Sabio.Web.Api.Controllers.Fourms
+{
+    [Route("api/forums")]
+    [ApiController]
+    public class ForumApiController : BaseApiController
+    {
+        private IForumService _service = null;
+        private IAuthenticationService<int> _authService = null;
+        public ForumApiController(IForumService service
+            , ILogger<ForumApiController> logger
+            , IAuthenticationService<int> authService) : base(logger)
+        {
+            _service = service;
+            _authService = authService;
+        }
+
+        [HttpGet("{id:int}")]
+        public ActionResult<ItemResponse<Forum>> GetById(int id)
+        {
+            int iCode = 200;
+            BaseResponse response = null;
+
+            try
+            {
+                Forum forum = _service.Get(id);
+
+                if (forum == null)
+                {
+                    iCode = 404;
+                    response = new ErrorResponse("Application Resource not found.");
+
+                }
+                else
+                {
+                    response = new ItemResponse<Forum> { Item = forum };
+                }
+            }
+            catch (Exception ex)
+            {
+                iCode = 500;
+                base.Logger.LogError(ex.ToString());
+                response = new ErrorResponse($"Generic Error: {ex.Message}");
+
+            }
+            return StatusCode(iCode, response);
+        }
+        [HttpGet]
+        public ActionResult<ItemsResponse<Forum>> GetAll()
+        {
+            int iCode = 200;
+            BaseResponse response = null;
+
+            try
+            {
+                List<Forum> list = _service.GetAll();
+
+                if (list == null)
+                {
+                    iCode = 404;
+                    response = new ErrorResponse("App Resource not found.");
+                }
+                else
+                {
+                    response = new ItemsResponse<Forum> { Items = list };
+                }
+            }
+            catch (Exception ex)
+            {
+                iCode = 500;
+                base.Logger.LogError(ex.ToString());
+                response = new ErrorResponse($"Generic Error: {ex.Message}");
+            }
+
+            return StatusCode(iCode, response);
+        }
+
+        [HttpPost]
+        public ActionResult<ItemResponse<int>> Create(ForumAddRequest model)
+        {
+            int iCode = 200;
+            ObjectResult result = null;
+            try
+            {
+                int id = _service.Add(model);
+
+                ItemResponse<int> response = new ItemResponse<int>() { Item = id };
+
+                result = Created201(response);
+
+            }
+            catch (Exception ex)
+            {
+                iCode = 500;
+                base.Logger.LogError(ex.ToString());
+                ErrorResponse response = new ErrorResponse(ex.Message);
+
+            }
+            return StatusCode(iCode, result);
+        }
+        [HttpPut("edit/{id:int}")]
+        public ActionResult<SuccessResponse> Update(ForumUpdateRequest model)
+        {
+
+            int iCode = 200;
+            BaseResponse response = null;
+
+            try
+            {
+                _service.Update(model);
+
+                response = new SuccessResponse();
+
+
+            }
+            catch (Exception ex)
+            {
+
+                iCode = 500;
+                base.Logger.LogError(ex.ToString());
+                response = new ErrorResponse($"Generic Error: {ex.Message}");
+            }
+            return StatusCode(iCode, response);
+        }
+        [HttpDelete("{id:int}")]
+        public ActionResult<SuccessResponse> Delete(int id)
+        {
+            int iCode = 200;
+            BaseResponse response = null;
+
+            try
+            {
+                _service.Delete(id);
+                response = new SuccessResponse();
+            }
+            catch (Exception ex)
+            {
+                iCode = 500;
+                base.Logger.LogError(ex.ToString());
+                response = new ErrorResponse($"Generic Error: {ex.Message}");
+            }
+
+            return StatusCode(iCode, response);
+        }
+        [HttpGet("categorypaginate")]
+        public ActionResult<ItemResponse<Paged<Forum>>> CategoryPagination(int pageIndex, int pageSize)
+        {
+            int iCode = 200;
+            BaseResponse response = null;
+            try
+            {
+                Paged<Forum> paged = _service.CategoryPagination(pageIndex, pageSize);
+                if (paged == null)
+                {
+                    iCode = 404;
+                    response = new ErrorResponse("Application Resource not found.");
+                }
+                else
+                {
+                    response = new ItemResponse<Paged<Forum>> { Item = paged };
+
+                }
+            }
+            catch (Exception ex)
+            {
+                iCode = 500;
+                base.Logger.LogError(ex.ToString());
+                response = new ErrorResponse($"Generic Error: {ex.Message}");
+            }
+            return StatusCode(iCode, response);
+        }
+        [HttpGet("allpaginate")]
+        public ActionResult<ItemResponse<Paged<Forum>>> AllPagination(int pageIndex, int pageSize)
+        {
+            int iCode = 200;
+            BaseResponse response = null;
+            try
+            {
+                Paged<Forum> paged = _service.AllPagination(pageIndex, pageSize);
+                if (paged == null)
+                {
+                    iCode = 404;
+                    response = new ErrorResponse("Application Resource not found.");
+                }
+                else
+                {
+                    response = new ItemResponse<Paged<Forum>> { Item = paged };
+
+                }
+            }
+            catch (Exception ex)
+            {
+                iCode = 500;
+                base.Logger.LogError(ex.ToString());
+                response = new ErrorResponse($"Generic Error: {ex.Message}");
+            }
+            return StatusCode(iCode, response);
+        }
+        [HttpGet("search")]
+        public ActionResult<ItemResponse<Paged<Forum>>> SearchPagination(int pageIndex, int pageSize, string query)
+        {
+            int iCode = 200;
+            BaseResponse response = null;
+            try
+            {
+                Paged<Forum> pagedForum = _service.SearchPagination(pageIndex, pageSize, query);
+                if (pagedForum == null)
+                {
+                    iCode = 404;
+                    response = new ErrorResponse("Application Resource not found.");
+                }
+                else
+                {
+                    response = new ItemResponse<Paged<Forum>> { Item = pagedForum };
+
+                }
+            }
+            catch (Exception ex)
+            {
+                iCode = 500;
+                base.Logger.LogError(ex.ToString());
+                response = new ErrorResponse($"Generic Error: {ex.Message}");
+            }
+            return StatusCode(iCode, response);
+        }
+
+        [HttpGet("entitypaginate")]
+        public ActionResult<ItemResponse<Paged<Forum>>> EntityPagination(int pageIndex, int pageSize)
+        {
+            int iCode = 200;
+            BaseResponse response = null;
+            try
+            {
+                Paged<Forum> paged = _service.EntityPagination(pageIndex, pageSize);
+                if (paged == null)
+                {
+                    iCode = 404;
+                    response = new ErrorResponse("Application Resource not found.");
+                }
+                else
+                {
+                    response = new ItemResponse<Paged<Forum>> { Item = paged };
+
+                }
+            }
+            catch (Exception ex)
+            {
+                iCode = 500;
+                base.Logger.LogError(ex.ToString());
+                response = new ErrorResponse($"Generic Error: {ex.Message}");
+            }
+            return StatusCode(iCode, response);
+        }
+        [HttpGet("details/{id:int}")]
+        public ActionResult<ItemResponse<ForumDetails>> GetForumDetails(int id)
+        {
+            int iCode = 200;
+            BaseResponse response = null;
+
+            try
+            {
+                ForumDetails forumDetails = _service.GetForumDetails(id);
+
+                if (forumDetails == null)
+                {
+                    iCode = 404;
+                    response = new ErrorResponse("Application Resource not found.");
+
+                }
+                else
+                {
+                    response = new ItemResponse<ForumDetails> { Item = forumDetails };
+                }
+            }
+            catch (Exception ex)
+            {
+                iCode = 500;
+                base.Logger.LogError(ex.ToString());
+                response = new ErrorResponse($"Generic Error: {ex.Message}");
+
+            }
+            return StatusCode(iCode, response);
+        }
+
+    }
+}
