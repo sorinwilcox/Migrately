@@ -1,0 +1,40 @@
+ALTER proc [dbo].[Forums_GetForumDetails]							 
+							@Id int
+
+as
+/* --- Test Code --
+		Declare @Id int = 2
+		Execute [dbo].[Forums_GetForumDetails] @Id
+
+		select *
+		from dbo.Forums
+		select *
+		from dbo.ForumCategories
+		select *
+		from dbo.ForumMembers
+				select *
+		from dbo.Users
+*/
+
+BEGIN
+SELECT f.[Id]
+		,f.[Name] as ForumName
+		,f.[Description]
+		,fc.[Name] as ForumCategoryName
+		,u.FirstName
+		,u.LastName
+		,u.AvatarUrl
+
+  FROM [dbo].[Forums] as f 
+		inner join [dbo].[ForumCategories] as fc
+		on f.ForumCategoryId = fc.Id
+		inner join [dbo].[ForumMembers] as fm
+		on fm.ForumId = f.Id
+		inner join [dbo].[Users] as u 
+		on fm.UserId = u.Id
+			
+	Where f.Id = @Id
+
+
+
+END
