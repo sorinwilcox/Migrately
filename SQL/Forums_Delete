@@ -1,0 +1,24 @@
+ALTER proc [dbo].[Forums_Delete]							 
+							@Id int
+
+as
+/* --- Test Code --
+		Declare @Id int =2
+
+		Execute dbo.Forums_Delete @Id
+
+		Select *
+		from dbo.forumMembers
+
+
+*/
+
+BEGIN
+
+
+  DELETE FROM [dbo].[Forums]
+	Where Id = @Id
+
+
+
+END
